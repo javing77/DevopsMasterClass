@@ -1,0 +1,6 @@
+Hola mundo
+Esto es una prueba
+_____
+Prueba de reset 
+---
+GIT Revert primer commit
