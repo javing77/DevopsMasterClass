@@ -189,3 +189,43 @@ Deshace un commit y pusha el cambio al repositorio de GitHub.
 
     git revert HEAD
     git push 
+
+## Identificar cambion entre WORKING y STAGING AREA
+
+Un archivo especifico puede hacerce con. 
+    
+    git diff Nombre_del_archivo
+
+Todos loa archivos
+
+    git diff
+
+## Módulo 4: Git Compare Commits
+
+    git diff f60dc2e f60dc2f
+
+# Módulo 6: Staching Area
+
+En esta área se alamacenan temporamente los archivos locales, sin enviarlos al repositorio. Muy practico cuando se está realizando un cambio pero por urgencia es neesario trabjar en un Fix. haciendo el git stash, se guardan los cambios en una rama temporal y podemos arreglar el bug, hacer commit push y luego volver al stash sin perder los cambios.
+
+    git stash                           # Guarda los cambios en una rama temporal
+
+    git stash list                      # Lista las ramas temporales
+    git stash apply nombre_del_stash    # Aplica los cambios de la rama temporal
+
+Finalmente tendríamos que borrrar los cambios que estan en el stash
+
+    git stash drop nombre_del_stash
+
+Para el caso en que se haya creado un creado un archivo y este no se encuentre en tracked files, se puede hacer un git stash -a para que se agregue este archivo tambien al area de stach.
+
+    git stash -a ARCHIVO_A_AGREGAR  # Agrega el archivo al area de stach
+
+Almacenando un stash con un mensaje
+
+    git stash save "Mensaje"
+
+Cambios hechos en un stash especifico
+
+    git stash show nombre_del_stash
+    
