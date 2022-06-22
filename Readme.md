@@ -228,4 +228,239 @@ Almacenando un stash con un mensaje
 Cambios hechos en un stash especifico
 
     git stash show nombre_del_stash
-    
+
+
+# Kubernetes -> Modulo 32 
+
+Crear un deployment usando kubectl sin yaml 
+
+```
+kubectl create deployment hello-node --image=k8s.gcr.io/echoserver:1.4
+```
+ Lo anterior crea el  Deployment replicaSet y el Pod.
+
+El anterior servicio lo podemo exponer usando kubectl expose 
+
+```
+kubectl expose deployment hello-node --type=LoadBalancer --port=8080
+``` 
+
+Validamos que el servicio esta disponible
+
+```
+kubectl get service hello-node
+```
+
+En el caso de usar docker-desktop, podemos ver el servicio en el siguiente link https://localhost:8080/.
+Para el caso de usar minikube, podemos ver el servicio usuando el comando 
+
+```
+minikube service hello-node
+```
+
+Para borrar el servicio y deployment
+
+```
+kubectl delete deployment hello-node
+kubectl delete service hello-node
+``` 
+ 
+ TODO: DIGITALOCEAN
+
+## ConfigMap
+
+Creando un configmap por comando 
+
+```
+kubectl create configmap pruebascommand --from-file /Users/javing77/Documentos/cursos/Kubernetes/DevopsMasterClass/index.html
+```
+
+Aplicando un ConfigMap por Yaml
+
+```
+kubectl apply -f ConfigMaps/example-configMap.yml
+
+```
+
+
+## Secret
+
+Similar al configmap pero con datos privados
+
+```
+kubectl create secret generic db-user-pass --from-file=userdb.txt --from-file=password.txt
+```
+
+## Leyendo un ConfigMap y un Secret en un Pod
+
+Se puede asignar en la sesion de env de un pod una variable con el valor de un configmap o un secret
+
+ConfigMap : container.env.name.configMapKeyRef  {name: Camp definido En el configmap, key: Campo definido en el configmap} 
+Secret : container.env.name.secretKeyRef  {name: Camp definido En el configmap, key: Campo definido en el configmap}
+
+```
+kubectl create -f ConfigMaps/configmap-env-demo.yml
+```
+
+## Poxis ConfigMap Cargar todas las valariables de una vez
+
+Se crea un configMap con las variables y se le asigna a un pod este configMap envFrom 
+
+```
+kubectl create -f ConfigMaps/configmap-poxis-configMap.yml
+```
+
+# RestarPolicy
+
+en el archivo [restarPolicies.yml](HealthCheck/restarPolicies.yml) encontrará ejemplos detallados de como funcionan los restarpolicies 
+
+
+********************************************************
+        PARA HACER EN DIGITALOCEAN :
+
+        168, 170, 171, 175, 176
+
+********************************************************
+Commands : SetUp K8s HA Cluster (Updated)
+
+    Due to Docker Version Update, Kubernetes Installation Process changed a bit, compared to as we shown in the last Lecture. We have updated the commands below, please follow in given sequence.
+
+
+************* Install Kubernetes on Master Node *************
+
+Upgrade apt packages
+    sudo apt-get updarte
+
+Create configuration file for containerd:
+    cat <<EOF | sudo tee /etc/modules-load.d/containerd.conf overlay br_netfilter EOF
+
+Load modules:
+
+        sudo modprobe overlay
+        sudo modprobe br_netfilter
+
+
+Set system configurations for Kubernetes networking:
+
+        cat <<EOF | sudo tee /etc/sysctl.d/99-kubernetes-cri.conf
+        net.bridge.bridge-nf-call-iptables = 1
+        net.ipv4.ip_forward = 1
+        net.bridge.bridge-nf-call-ip6tables = 1
+        EOF
+
+
+Apply new settings:
+    sudo sysctl --system
+
+Install containerd:
+
+        sudo apt-get update && sudo apt-get install -y containerd
+
+Create default configuration file for containerd:
+
+        sudo mkdir -p /etc/containerd
+
+
+Generate default containerd configuration and save to the newly created default file:
+
+        sudo containerd config default | sudo tee /etc/containerd/config.toml
+
+
+Restart containerd to ensure new configuration file usage:
+
+        sudo systemctl restart containerd
+
+
+Verify that containerd is running.
+
+        sudo systemctl status containerd
+
+
+Disable swap:
+
+        sudo swapoff -a
+
+
+Disable swap on startup in /etc/fstab:
+
+        sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
+
+
+Install dependency packages:
+
+        sudo apt-get update && sudo apt-get install -y apt-transport-https curl
+
+
+Download and add GPG key:
+
+        curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+
+
+Add Kubernetes to repository list:
+
+        cat <<EOF | sudo tee /etc/apt/sources.list.d/kubernetes.list
+        deb https://apt.kubernetes.io/ kubernetes-xenial main
+        EOF
+
+
+Update package listings:
+
+        sudo apt-get update
+
+
+Install Kubernetes packages (Note: If you get a dpkg lock message, just wait a minute or two before trying the command again):
+
+        sudo apt-get install -y kubelet=1.21.0-00 kubeadm=1.21.0-00 kubectl=1.21.0-00
+
+
+Turn off automatic updates:
+
+        sudo apt-mark hold kubelet kubeadm kubectl
+
+
+Log into both Worker Nodes to perform previous steps 1 to 18.
+
+Initialize the Cluster-
+
+Initialize the Kubernetes cluster on the control plane node using kubeadm (Note: This is only performed on the Control Plane Node):
+
+        sudo kubeadm init --pod-network-cidr 192.168.0.0/16 --kubernetes-version 1.21.0
+
+
+Set kubectl access:
+
+        mkdir -p $HOME/.kube
+        sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+        sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+
+Test access to cluster:
+
+        kubectl get nodes
+
+
+Install the Calico Network Add-On -
+
+On the Control Plane Node, install Calico Networking:
+
+        kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+
+
+Wait for 2-4 Min and Check status of the control plane node:
+
+        kubectl get nodes
+
+
+Join the Worker Nodes to the Cluster
+
+In the Control Plane Node, create the token and copy the kubeadm join command (NOTE:The join command can also be found in the output from kubeadm init command):
+
+            kubeadm token create --print-join-command
+
+In both Worker Nodes, paste the kubeadm join command to join the cluster. Use sudo to run it as root:
+
+            sudo kubeadm join ...
+
+In the Control Plane Node, view cluster status (Note: You may have to wait a few moments to allow all nodes to become ready):
+
+            kubectl get nodes
