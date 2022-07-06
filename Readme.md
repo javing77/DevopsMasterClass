@@ -282,6 +282,13 @@ kubectl apply -f ConfigMaps/example-configMap.yml
 
 ```
 
+## Deployment 
+Cambiar una imagen en un deployment
+
+```
+kubectl set image deployment/hello-node hello-node=k8s.gcr.io/echoserver:1.4
+``` 
+
 
 ## Secret
 
@@ -314,16 +321,40 @@ kubectl create -f ConfigMaps/configmap-poxis-configMap.yml
 
 en el archivo [restarPolicies.yml](HealthCheck/restarPolicies.yml) encontrará ejemplos detallados de como funcionan los restarpolicies 
 
+### Escalar manualmente un ReplicaSet
+
+  
+  ```
+  kubectl scale  rs rs-frontend --replicas=3
+  ```
+
+ # LifeCycle de un pod
+
+ ## Estados de un pod
+ 1. Pending: El pod ha sido aceptado por Kubernetes pero no se ha podido ejecutar (container). 
+ 2. Running: El pod es schedulado y todos sus containers han sido creados y almenos uno se encuentra corriendo.
+ 3. Succeeded: El pod ha terminado satisfactoriamente en estado 0.
+ 4. Failed: El pod ha terminado con un estado no 0.
+ 5. CrashLoopBackOff: El pod ha fallado y está intentando volver a ejecutarse.
+
+
+ # Kubernetes Networking
+ # Ingress
+ ![](./ingress/ingress.png)
+![](./ingress/structureingress.png)
 
 ********************************************************
         PARA HACER EN DIGITALOCEAN :
 
-        168, 170, 171, 175, 176
+        168, 170, 171, 175, 176, 194, 199, 217 
 
 ********************************************************
 Commands : SetUp K8s HA Cluster (Updated)
 
     Due to Docker Version Update, Kubernetes Installation Process changed a bit, compared to as we shown in the last Lecture. We have updated the commands below, please follow in given sequence.
+
+
+
 
 
 ************* Install Kubernetes on Master Node *************
